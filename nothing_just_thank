@@ -1,0 +1,38 @@
+Just want to say thanks. Very simple and you saved me tons of time.
+Thank you!
+
+By the way, I modified c# part for better performance.
+
+using UnityEngine;
+using System.Collections;
+using System.Runtime.InteropServices;
+
+public class DetectHeadset
+{
+#if UNITY_IOS
+    [DllImport ("__Internal")]
+    static private extern bool _Detect();
+#elif UNITY_ANDROID && !UNITY_EDITOR
+    static AndroidJavaObject androidPlugin;
+#endif
+
+    static DetectHeadset()
+    {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        AndroidJavaClass javaUnityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+        AndroidJavaObject currentActivity = javaUnityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+        androidPlugin = new AndroidJavaObject("com.davikingcode.DetectHeadset.DetectHeadset", currentActivity);
+#endif
+    }
+
+	static public bool Detect()
+    {
+#if UNITY_IOS
+        return _Detect();
+#elif UNITY_ANDROID && !UNITY_EDITOR
+        return androidPlugin.Call<bool>("_Detect");
+#else
+        return true;
+#endif
+    }
+}
